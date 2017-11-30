@@ -1,20 +1,27 @@
 var express=require("express");
 var app=express();
-var Server=require("http").createServer(app);
-var io=require("socket.io")(Server);
-var user=[];
-app.use(express.static(__dirname+"/bower_components"));
-app.get("/",function(req,res,next){
-  res.sendFile(__dirname+"/server.html");
+app.use(express.static("public"));
+var server=app.listen(3000,function(){
+  console.log("Server is listening to port 3000");
 });
-io.on('connection', function(socket) {
-  user.push(socket);
-  console.log(user.length+" Friends are Online");
+var socket=require("socket.io");
+var io=socket(server);
+app.get("/",function(req,res){
+  res.sendFile(__dirname+"/public/server.html");
+})
 
-  socket.on("send message" ,function(data){
-    console.log(data);
-    io.sockets.emit("new message",{msg:data});
-    });
-   })
+io.on("connection",function(socket){
 
-Server.listen(3000);
+  console.log("Connection is made "+socket.id);
+
+  socket.on("chat",function(data){
+
+    
+
+    io.sockets.emit("chat",data);
+
+  socket.on("typing",function(data){
+    socket.broadcast.emit("typing",data);
+  })
+  })
+})
